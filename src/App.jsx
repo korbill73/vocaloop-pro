@@ -40,14 +40,33 @@ const TimeInput = ({ value, label, onSync, onChange }) => {
 
 const TitleInput = ({ value, onChange }) => {
   const [localValue, setLocalValue] = useState(value || '');
-  const [isEditing, setIsEditing] = useState(false);
-  useEffect(() => { if (!isEditing) setLocalValue(value || ''); }, [value, isEditing]);
+  const inputRef = useRef(null);
+  
+  useEffect(() => {
+    if (document.activeElement !== inputRef.current) {
+      setLocalValue(value || '');
+    }
+  }, [value]);
+
+  const handleChange = (e) => {
+    setLocalValue(e.target.value);
+  };
+
   const handleBlur = () => {
-    setIsEditing(false);
     if (localValue !== value) onChange(localValue);
   };
+
   return (
-    <input type="text" value={localValue} onChange={(e) => setLocalValue(e.target.value)} onFocus={() => setIsEditing(true)} onBlur={handleBlur} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} style={{ flex: 1, background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '6px', color: 'white' }} />
+    <input 
+      ref={inputRef}
+      type="text" 
+      value={localValue} 
+      onChange={handleChange} 
+      onBlur={handleBlur} 
+      onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} 
+      onClick={(e) => e.stopPropagation()}
+      style={{ flex: 1, background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '6px', color: 'white' }} 
+    />
   );
 };
 
@@ -605,7 +624,7 @@ function MainApp() {
                           
                           {activeLoop?.id === loop.id && activeTab !== 'NORMAL' && (
                             <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--primary)', marginLeft: '8px' }}>
-                              (진행: {itemRepeats > 0 ? `${activeLoopCount + 1}/${itemRepeats}` : `${activeLoopCount + 1}회`})
+                              {itemRepeats > 0 ? `${activeLoopCount + 1}/${itemRepeats}` : `${activeLoopCount + 1}`}
                             </span>
                           )}
 
