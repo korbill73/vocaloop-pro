@@ -358,17 +358,27 @@ input[type="number"] {
   }
   .main-content > div:nth-child(2) {
     flex-direction: row !important;
-    gap: 12px !important;
+    gap: 8px !important;
   }
   .main-content > div:nth-child(2) > div:first-child {
-    flex: 1.5 !important;
-    padding: 0 0 12px 12px !important;
+    flex: 2.5 !important;
+    padding: 0 0 8px 8px !important;
+    justify-content: center;
+  }
+  .main-content > div:nth-child(2) > div:first-child > div.glass-panel {
+    padding: 0 !important;
+    border-radius: 4px;
+    background: black;
   }
   .main-content > div:nth-child(2) > div:last-child {
     flex: 1 !important;
-    padding: 0 12px 12px 0 !important;
+    padding: 0 8px 8px 0 !important;
+    min-width: 250px;
   }
   .hide-on-mobile {
+    display: none !important;
+  }
+  .hide-on-landscape {
     display: none !important;
   }
   .mobile-only {

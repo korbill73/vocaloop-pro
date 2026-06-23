@@ -539,7 +539,7 @@ function MainApp() {
                       <YouTube key={videoId} videoId={videoId} opts={{ width: '100%', height: '100%', playerVars: { autoplay: 1, rel: 0, modestbranding: 1, origin: window.location.origin, enablejsapi: 1, cc_load_policy: 1, cc_lang_pref: 'ko' } }} onReady={(e) => { playerRef.current = e.target; setIsReady(true); setPlayerError(false); setDuration(e.target.getDuration()); e.target.setPlaybackRate(playbackRate); }} onStateChange={handleStateChange} onError={() => setPlayerError(true)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
                     )}
                   </div>
-                  <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="hide-on-landscape" style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                       <button className="btn btn-primary" onClick={togglePlay} style={{ padding: '10px', borderRadius: '50%' }} disabled={playerError || !videoId}>{isPlaying ? <Pause size={18} /> : <Play size={18} />}</button>
                       <span style={{ fontFamily: 'monospace', fontSize: '15px' }}>{formatTime(currentTime)} / {formatTime(duration)}</span>
