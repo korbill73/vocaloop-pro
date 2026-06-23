@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, Video, Plus, PlayCircle, Eye, Clock, Trash2 } from 'lucide-react';
+import { Folder, Video, Plus, PlayCircle, Eye, Clock, Download, Upload } from 'lucide-react';
 import { addCategory } from '../utils/storage';
 
 export default function Sidebar({ data, onSelectCategory, selectedCategoryId, onSelectVideo, selectedVideoId, onDataChange }) {
@@ -21,6 +21,38 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
     if (seconds < 60) return `${seconds}s`;
     const min = Math.floor(seconds / 60);
     return `${min}m`;
+  };
+
+  const handleExportData = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    const dateStr = new Date().toISOString().slice(0,10);
+    downloadAnchorNode.setAttribute("download", `vocaloop_backup_${dateStr}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleImportData = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const importedData = JSON.parse(ev.target.result);
+        if (importedData && importedData.categories && importedData.videos) {
+          localStorage.setItem('vocaloop_data', JSON.stringify(importedData));
+          window.location.reload();
+        } else {
+          alert('올바른 VocaLoop 데이터 파일이 아닙니다.');
+        }
+      } catch (err) {
+        alert('파일을 읽는 중 오류가 발생했습니다.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; // reset input
   };
 
   return (
@@ -108,6 +140,17 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
             + 버튼을 눌러 카테고리를 추가하세요.
           </div>
         )}
+      </div>
+
+      {/* Backup and Restore Area */}
+      <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px' }}>
+        <button className="btn btn-sm" onClick={handleExportData} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', background: 'rgba(255,255,255,0.05)' }}>
+          <Download size={14} /> 데이터 백업
+        </button>
+        <label className="btn btn-sm" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', margin: 0 }}>
+          <Upload size={14} /> 복원
+          <input type="file" accept=".json" onChange={handleImportData} style={{ display: 'none' }} />
+        </label>
       </div>
     </aside>
   );
