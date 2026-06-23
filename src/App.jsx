@@ -494,7 +494,7 @@ function MainApp() {
     : [];
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${selectedVideoId ? 'video-selected' : ''}`}>
       <Sidebar 
         data={data}
         onSelectCategory={handleSelectCategory}
@@ -514,14 +514,17 @@ function MainApp() {
         ) : (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, marginRight: '16px' }}>
+              <div style={{ flex: 1, marginRight: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button className="btn btn-sm btn-outline mobile-only" onClick={() => setSelectedVideoId(null)} style={{ padding: '4px', borderRadius: '50%' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
                 <h2 style={{ fontSize: '20px', fontWeight: 'bold', lineHeight: 1.4 }}>{currentVideo?.title}</h2>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <div className="hide-on-mobile" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
                   <button className="btn btn-sm btn-outline" onClick={openEditVideoModal}><Edit2 size={12} /> 정보 수정</button>
                   <button className="btn btn-sm" style={{ border: '1px solid var(--danger)', color: 'var(--danger)' }} onClick={handleDeleteVideo}><Trash2 size={12} /> 영상 삭제</button>
                 </div>
               </div>
-              <button className="btn btn-primary btn-sm" onClick={openAddVideoModal} style={{ flexShrink: 0 }}><Plus size={14} /> 다른 영상 등록</button>
+              <button className="btn btn-primary btn-sm hide-on-mobile" onClick={openAddVideoModal} style={{ flexShrink: 0 }}><Plus size={14} /> 다른 영상 등록</button>
             </div>
             <div style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0 }}>
               <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -555,7 +558,7 @@ function MainApp() {
                     </div>
                   </div>
                 </div>
-                <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="glass-panel hide-on-mobile" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <button className="btn btn-outline" onClick={handleSetLoopA} disabled={playerError || !videoId}>A 구간 설정</button>
                   <button className="btn btn-primary" onClick={handleSetLoopB} disabled={playerError || !videoId || tempLoopStart === null}>B 구간 설정</button>
                 </div>
@@ -581,12 +584,14 @@ function MainApp() {
                           <button style={{ background: 'none', border: 'none', color: activeLoop?.id === loop.id && activeTab !== 'NORMAL' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer' }} onClick={() => playSpecificLoop(loop)} title="이 구간만 재생하기"><Play size={20} fill={activeLoop?.id === loop.id && activeTab !== 'NORMAL' ? "currentColor" : "none"} /></button>
                           <div onClick={() => toggleLoopSelection(loop.id)} style={{ cursor: 'pointer' }}>{selectedLoopIds.has(loop.id) ? <CheckCircle size={20} color="var(--primary)" /> : <Circle size={20} color="var(--text-muted)" />}</div>
                           <TitleInput value={loop.title} onChange={(newTitle) => handleUpdateLoopContent(loop.id, { title: newTitle })} />
-                          <button style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }} onClick={() => handleAutoFillTitle(loop)}><MessageSquare size={16} /></button>
-                          <button style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} onClick={() => setData(removeLoop(selectedVideoId, loop.id))}><Trash2 size={16} /></button>
+                          <button className="hide-on-mobile" style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }} onClick={() => handleAutoFillTitle(loop)}><MessageSquare size={16} /></button>
+                          <button className="hide-on-mobile" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} onClick={() => setData(removeLoop(selectedVideoId, loop.id))}><Trash2 size={16} /></button>
                         </div>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center' }}>
-                          <TimeInput value={loop.start} label="A" onSync={() => handleUpdateLoopContent(loop.id, { start: currentTime })} onChange={(val) => handleUpdateLoopContent(loop.id, { start: val })} />
-                          <TimeInput value={loop.end} label="B" onSync={() => handleUpdateLoopContent(loop.id, { end: currentTime })} onChange={(val) => handleUpdateLoopContent(loop.id, { end: val })} />
+                          <div className="hide-on-mobile" style={{ display: 'flex', gap: '8px' }}>
+                            <TimeInput value={loop.start} label="A" onSync={() => handleUpdateLoopContent(loop.id, { start: currentTime })} onChange={(val) => handleUpdateLoopContent(loop.id, { start: val })} />
+                            <TimeInput value={loop.end} label="B" onSync={() => handleUpdateLoopContent(loop.id, { end: currentTime })} onChange={(val) => handleUpdateLoopContent(loop.id, { end: val })} />
+                          </div>
                           
                           {activeLoop?.id === loop.id && activeTab !== 'NORMAL' && (
                             <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--primary)', marginLeft: '8px' }}>
