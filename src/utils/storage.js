@@ -1,21 +1,66 @@
+import defaultDataJson from '../data/defaultData.json';
+
 const STORAGE_KEY = 'vocaloop_data';
 
-const defaultData = {
-  categories: [],
-  videos: []
-};
-
 export const getStorageData = () => {
+  const baseData = JSON.parse(JSON.stringify(defaultDataJson));
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : defaultData;
+    if (data) {
+      const localData = JSON.parse(data);
+      const mergedVideos = [...(baseData.videos || [])];
+      
+      if (localData.videos) {
+        localData.videos.forEach(lv => {
+          const bv = mergedVideos.find(v => v.id === lv.id);
+          if (!bv) {
+            mergedVideos.push(lv);
+          } else {
+            bv.views = Math.max(bv.views || 0, lv.views || 0);
+            bv.watchedSeconds = Math.max(bv.watchedSeconds || 0, lv.watchedSeconds || 0);
+            if (lv.loops) {
+              if (!bv.loops) bv.loops = [];
+              lv.loops.forEach(ll => {
+                const bl = bv.loops.find(l => l.id === ll.id);
+                if (!bl) {
+                  bv.loops.push(ll);
+                } else {
+                  bl.playCount = Math.max(bl.playCount || 0, ll.playCount || 0);
+                  bl.watchTime = Math.max(bl.watchTime || 0, ll.watchTime || 0);
+                }
+              });
+              bv.loops.sort((a,b) => a.start - b.start);
+            }
+          }
+        });
+      }
+
+      const mergedCategories = [...(baseData.categories || [])];
+      if (localData.categories) {
+        localData.categories.forEach(lc => {
+          if (!mergedCategories.find(c => c.id === lc.id)) {
+            mergedCategories.push(lc);
+          }
+        });
+      }
+      return { categories: mergedCategories, videos: mergedVideos };
+    }
   } catch (e) {
-    return defaultData;
+    console.error("Error reading storage:", e);
   }
+  return baseData;
 };
 
 export const saveStorageData = (data) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  
+  if (import.meta.env.DEV) {
+    fetch('/api/save-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data, null, 2)
+    }).catch(err => console.error("Auto-save failed:", err));
+  }
 };
 
 export const addCategory = (name) => {
