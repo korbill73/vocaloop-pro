@@ -6,7 +6,7 @@ import {
   addLoop, removeLoop, updateLoop, addLoopAnalytics
 } from './utils/storage';
 import { fetchCaptions } from './utils/youtubeCaptions';
-import { Repeat, Plus, Play, Pause, Trash2, RefreshCcw, Edit2, CheckCircle, Circle, MessageSquare } from 'lucide-react';
+import { Repeat, Plus, Play, Pause, Trash2, RefreshCcw, Edit2, CheckCircle, Circle, MessageSquare, List, CheckSquare, Film } from 'lucide-react';
 
 const formatTime = (seconds) => {
   if (!seconds || isNaN(seconds)) return "00:00.0";
@@ -566,15 +566,25 @@ function MainApp() {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', borderBottom: '1px solid var(--panel-border)', marginBottom: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex' }}>
-                      <div style={{ padding: '8px 16px', cursor: 'pointer', borderBottom: activeTab === 'ALL' ? '2px solid var(--primary)' : '2px solid transparent' }} onClick={() => handleTabClick('ALL')}>모든 구간</div>
-                      <div style={{ padding: '8px 16px', cursor: 'pointer', borderBottom: activeTab === 'SELECTED' ? '2px solid var(--primary)' : '2px solid transparent' }} onClick={() => handleTabClick('SELECTED')}>선택 반복</div>
-                      <div style={{ padding: '8px 16px', cursor: 'pointer', borderBottom: activeTab === 'NORMAL' ? '2px solid var(--primary)' : '2px solid transparent' }} onClick={() => handleTabClick('NORMAL')}>전체 재생</div>
+                    <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around' }}>
+                      <div style={{ padding: '8px', flex: 1, textAlign: 'center', cursor: 'pointer', borderBottom: activeTab === 'ALL' ? '2px solid var(--primary)' : '2px solid transparent', color: activeTab === 'ALL' ? 'var(--primary)' : 'var(--text-main)' }} onClick={() => handleTabClick('ALL')} title="모든 구간">
+                        <span className="hide-on-mobile">모든 구간</span>
+                        <List className="mobile-only" style={{ margin: '0 auto' }} size={18} />
+                      </div>
+                      <div style={{ padding: '8px', flex: 1, textAlign: 'center', cursor: 'pointer', borderBottom: activeTab === 'SELECTED' ? '2px solid var(--primary)' : '2px solid transparent', color: activeTab === 'SELECTED' ? 'var(--primary)' : 'var(--text-main)' }} onClick={() => handleTabClick('SELECTED')} title="선택 반복">
+                        <span className="hide-on-mobile">선택 반복</span>
+                        <CheckSquare className="mobile-only" style={{ margin: '0 auto' }} size={18} />
+                      </div>
+                      <div style={{ padding: '8px', flex: 1, textAlign: 'center', cursor: 'pointer', borderBottom: activeTab === 'NORMAL' ? '2px solid var(--primary)' : '2px solid transparent', color: activeTab === 'NORMAL' ? 'var(--primary)' : 'var(--text-main)' }} onClick={() => handleTabClick('NORMAL')} title="전체 재생">
+                        <span className="hide-on-mobile">전체 재생</span>
+                        <Film className="mobile-only" style={{ margin: '0 auto' }} size={18} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      <span>반복 횟수:</span>
-                      <input type="number" value={itemRepeats} onChange={(e) => setItemRepeats(Number(e.target.value) || 0)} min="0" style={{ width: '60px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '4px', borderRadius: '4px', textAlign: 'center' }} />
-                      <span>회</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 8px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                      <span className="hide-on-mobile">반복 횟수:</span>
+                      <Repeat className="mobile-only" size={16} />
+                      <input type="number" value={itemRepeats} onChange={(e) => setItemRepeats(Number(e.target.value) || 0)} min="0" style={{ width: '40px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '4px', borderRadius: '4px', textAlign: 'center' }} />
+                      <span className="hide-on-mobile">회</span>
                     </div>
                   </div>
                   <div style={{ flex: 1, overflowY: 'auto' }}>
