@@ -20,19 +20,21 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
     if (!seconds) return '0m';
     if (seconds < 60) return `${seconds}s`;
     const min = Math.floor(seconds / 60);
-    return `${min}m`;
+  const handleAdminToggle = () => {
+    const current = sessionStorage.getItem('admin_secret');
+    if (current) {
+      sessionStorage.removeItem('admin_secret');
+      window.location.reload();
+    } else {
+      const pw = prompt("관리자 비밀번호를 입력하세요:");
+      if (pw) {
+        sessionStorage.setItem('admin_secret', pw);
+        window.location.reload();
+      }
+    }
   };
 
-  const handleExportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    const dateStr = new Date().toISOString().slice(0,10);
-    downloadAnchorNode.setAttribute("download", `vocaloop_backup_${dateStr}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  };
+  const isAdmin = !!sessionStorage.getItem('admin_secret');
 
   const handleImportData = (e) => {
     const file = e.target.files[0];
@@ -42,8 +44,12 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
       try {
         const importedData = JSON.parse(ev.target.result);
         if (importedData && importedData.categories && importedData.videos) {
-          localStorage.setItem('vocaloop_data', JSON.stringify(importedData));
-          window.location.reload();
+          // Sync directly to Supabase via saveStorageData since we are admin
+          import('../utils/storage').then(({ saveStorageData }) => {
+             saveStorageData(importedData).then(() => {
+                window.location.reload();
+             });
+          });
         } else {
           alert('올바른 VocaLoop 데이터 파일이 아닙니다.');
         }
@@ -57,6 +63,7 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
 
   return (
     <aside className="sidebar">
+      {/* ... keeping the rest the same ... */}
       <div className="sidebar-header">
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Video color="var(--primary)" /> VocaLoop Pro
@@ -68,9 +75,11 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
           <h3 style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Channels / Categories
           </h3>
-          <button className="btn btn-sm" style={{ padding: '2px 6px' }} onClick={() => setIsAddingCat(true)}>
-            <Plus size={14} />
-          </button>
+          {isAdmin && (
+            <button className="btn btn-sm" style={{ padding: '2px 6px' }} onClick={() => setIsAddingCat(true)}>
+              <Plus size={14} />
+            </button>
+          )}
         </div>
 
         {isAddingCat && (
@@ -137,20 +146,24 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
 
         {data.categories.length === 0 && (
           <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '13px' }}>
-            + 버튼을 눌러 카테고리를 추가하세요.
+            등록된 카테고리가 없습니다.
           </div>
         )}
       </div>
 
-      {/* Backup and Restore Area */}
-      <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px' }}>
-        <button className="btn btn-sm" onClick={handleExportData} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', background: 'rgba(255,255,255,0.05)' }}>
-          <Download size={14} /> 데이터 백업
+      {/* Admin Mode Toggle Area */}
+      <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <label className="btn btn-sm" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', margin: 0 }}>
+              데이터 복원(DB)
+              <input type="file" accept=".json" onChange={handleImportData} style={{ display: 'none' }} />
+            </label>
+          </div>
+        )}
+        <button className="btn btn-sm" onClick={handleAdminToggle} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', background: isAdmin ? 'rgba(0,255,255,0.1)' : 'rgba(255,255,255,0.05)', color: isAdmin ? '#00ffff' : 'white', border: isAdmin ? '1px solid rgba(0,255,255,0.3)' : 'none' }}>
+          {isAdmin ? '관리자 권한 활성화됨' : '관리자 모드 접속'}
         </button>
-        <label className="btn btn-sm" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', margin: 0 }}>
-          <Upload size={14} /> 복원
-          <input type="file" accept=".json" onChange={handleImportData} style={{ display: 'none' }} />
-        </label>
       </div>
     </aside>
   );

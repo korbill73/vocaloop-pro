@@ -1,65 +1,33 @@
-import defaultDataJson from '../data/defaultData.json';
+import { supabase } from './supabase';
 
-const STORAGE_KEY = 'vocaloop_data';
+let localCache = { categories: [], videos: [] };
 
-export const getStorageData = () => {
-  const baseData = JSON.parse(JSON.stringify(defaultDataJson));
+export const initStorage = async () => {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (data) {
-      const localData = JSON.parse(data);
-      const mergedVideos = [...(baseData.videos || [])];
-      
-      if (localData.videos) {
-        localData.videos.forEach(lv => {
-          const bv = mergedVideos.find(v => v.id === lv.id);
-          if (!bv) {
-            mergedVideos.push(lv);
-          } else {
-            bv.views = Math.max(bv.views || 0, lv.views || 0);
-            bv.watchedSeconds = Math.max(bv.watchedSeconds || 0, lv.watchedSeconds || 0);
-            if (lv.loops) {
-              if (!bv.loops) bv.loops = [];
-              lv.loops.forEach(ll => {
-                const bl = bv.loops.find(l => l.id === ll.id);
-                if (!bl) {
-                  bv.loops.push(ll);
-                } else {
-                  bl.playCount = Math.max(bl.playCount || 0, ll.playCount || 0);
-                  bl.watchTime = Math.max(bl.watchTime || 0, ll.watchTime || 0);
-                }
-              });
-              bv.loops.sort((a,b) => a.start - b.start);
-            }
-          }
-        });
-      }
-
-      const mergedCategories = [...(baseData.categories || [])];
-      if (localData.categories) {
-        localData.categories.forEach(lc => {
-          if (!mergedCategories.find(c => c.id === lc.id)) {
-            mergedCategories.push(lc);
-          }
-        });
-      }
-      return { categories: mergedCategories, videos: mergedVideos };
+    const { data, error } = await supabase.from('vocaloop_store').select('data').eq('id', 1).single();
+    if (data && data.data) {
+      localCache = data.data;
     }
-  } catch (e) {
-    console.error("Error reading storage:", e);
+  } catch (err) {
+    console.error("Error fetching from Supabase:", err);
   }
-  return baseData;
+  return localCache;
 };
 
-export const saveStorageData = (data) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  
-  if (import.meta.env.DEV) {
-    fetch('/api/save-data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data, null, 2)
-    }).catch(err => console.error("Auto-save failed:", err));
+export const getStorageData = () => {
+  return localCache;
+};
+
+export const saveStorageData = async (data) => {
+  localCache = data;
+  const adminSecret = sessionStorage.getItem('admin_secret');
+  if (adminSecret) {
+    try {
+      const { error } = await supabase.rpc('update_vocaloop_data', { secret_key: adminSecret, new_data: data });
+      if (error) console.error("RPC Error:", error);
+    } catch (err) {
+      console.error("Failed to sync to Supabase:", err);
+    }
   }
 };
 

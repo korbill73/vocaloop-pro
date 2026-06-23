@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import YouTube from 'react-youtube';
 import Sidebar from './components/Sidebar';
 import { 
-  getStorageData, addVideo, updateVideo, removeVideo, addViewCount, addWatchedTime, 
+  initStorage, getStorageData, addVideo, updateVideo, removeVideo, addViewCount, addWatchedTime, 
   addLoop, removeLoop, updateLoop, addLoopAnalytics
 } from './utils/storage';
 import { fetchCaptions } from './utils/youtubeCaptions';
@@ -136,7 +136,7 @@ function MainApp() {
   const videoId = currentVideo ? getVideoId(currentVideo.url) : null;
 
   useEffect(() => {
-    setData(getStorageData());
+    initStorage().then(setData);
   }, []);
 
   // Fetch captions when videoId changes
