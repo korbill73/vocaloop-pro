@@ -341,4 +341,39 @@ input[type="number"] {
   }
 }
 
+/* Landscape Mobile Optimization */
+@media (max-width: 950px) and (orientation: landscape) {
+  .app-container.video-selected .sidebar {
+    display: none !important;
+  }
+  .app-container:not(.video-selected) .main-content {
+    display: none !important;
+  }
+  .main-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  .main-content > div:first-child {
+    padding: 8px 12px;
+  }
+  .main-content > div:nth-child(2) {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+  .main-content > div:nth-child(2) > div:first-child {
+    flex: 1.5 !important;
+    padding: 0 0 12px 12px !important;
+  }
+  .main-content > div:nth-child(2) > div:last-child {
+    flex: 1 !important;
+    padding: 0 12px 12px 0 !important;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+}
+
 
