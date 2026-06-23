@@ -19,6 +19,7 @@ export default function Sidebar({ data, onSelectCategory, selectedCategoryId, on
   const formatWatchTime = (seconds) => {
     if (!seconds) return '0m';
     if (seconds < 60) return `${seconds}s`;
+    const min = Math.floor(seconds / 60);
     return `${min}m`;
   };
 
